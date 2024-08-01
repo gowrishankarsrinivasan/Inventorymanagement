@@ -1,15 +1,17 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const userSchema = require("./Scheme/userScheme");
+const inventoryRouter = require("./routes/inventoryRoutes"); 
 const app = express();
 const PORT = 5000;
 const url = `mongodb+srv://Gowri:vAr7FsLKbd1jYNR5@my-application.nbaf01g.mongodb.net/?retryWrites=true&w=majority&appName=My-Application`;
 
 const User = mongoose.model("User", userSchema);
-const cors = require("cors");
 
 app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
+
 
 mongoose.connect(url)
   .then(() => {
@@ -19,15 +21,11 @@ mongoose.connect(url)
     console.error("Error connecting to MongoDB", err);
   });
 
+
 app.post("/save", async (req, res) => {
   try {
     const { name, email, mobile, age } = req.body;
-    const user = new User({
-      name,
-      email,
-      mobile,
-      age,
-    });
+    const user = new User({ name, email, mobile, age });
 
     await user.save();
     res.status(201).json({ message: "User created successfully" });
@@ -60,6 +58,9 @@ app.get("/users/:name", async (req, res) => {
     res.status(500).json({ error: "Error fetching user by name" });
   }
 });
+
+
+app.use('/inventory', inventoryRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
